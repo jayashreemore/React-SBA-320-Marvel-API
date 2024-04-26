@@ -15,6 +15,14 @@ Fetch API
 md5 (for hashing)
 Marvel API
 
+Installation:
+git clone ..url
+cd marvel-character-search-app
+npm install
+REACT_APP_PUBLIC_API_KEY=your_public_api_key
+REACT_APP_PRIVATE_API_KEY=your_private_api_key
+npm start
+
 Check this project here 
 
 https://resilient-taiyaki-d376dd.netlify.app/

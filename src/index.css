@@ -1,68 +1,75 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/*import { useState } from "react";
+import md5 from "md5";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+export default function Search() {
+    const [characterName, setCharacterName] = useState("");
+    const [characterData, setCharacterData] = useState("null");
+    const [comicData, setComicData] = useState("null");
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+    const PUBLIC_API_KEY = import.meta.env.VITE_PUBLIC_API_KEY;
+    const PRIVATE_API_KEY= import.meta.env.VITE_PRIVATE_API_KEY;
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        getCharacterData();
+    };
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+    const generateHash = (timeStamp) => {
+        return md5(timeStamp  + PUBLIC_API_KEY + PRIVATE_API_KEY);
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+    };
+
+    const getCharacterData = () => {
+        setCharacterData(null);
+        setComicData(null);
+
+        const timeStamp = new Date().getTime();
+        const hash = generateHash(timeStamp);
+
+        //const url = `https://gateway.marvel./v1/public/characters?apikey=${publicKey}&hash=${hash}&ts=${timeStamp}&nameStartsWith=${characterName}&limit=100`;
+        const url = `https://gateway.marvel.com/v1/public/characters/?apikey=${PUBLIC_API_KEY}&ts=${timeStamp}&hash=${hash}`;
+        fetch(url)
+            .then((response) => response.json())
+            .then((result) => {
+                setCharacterData(result.data);
+                console.log(result.data);
+            })
+
+            .catch(() => {
+                console.log('error while getting Character Data');
+
+            });
+        
+    }
+
+    const handleChange = (event) => {
+        setCharacterName(event.target.value);
+    };
+
+    const handleReset = () => {
+        // ll use later 
+    };
+
+    return (
+        <>
+            <form className="search" onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    placeholder="Enter Character Name"
+                    onChange={handleChange}
+                />
+                <div className="buttons">
+                    <button type="submit">Get Chracter Data</button>
+                    <button type="reset" className="reset" onClick={handleChange}>
+                        Reset
+                    </button>
+                </div>
+            </form>
+        </>
+    );
 }
+// buttons to search characters name and reset it
+// 
+/*/

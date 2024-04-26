@@ -1,74 +1,65 @@
-import { useState } from "react";
-import md5 from "md5";
+import React, { useState, useEffect } from 'react';
+import md5 from 'md5';
 
+const API_URL = "https://gateway.marvel.com/v1/public/characters";
+const PUBLIC_API_KEY = "8c603d5552fad3e025fa1a8fd502dccc";
+const PRIVATE_API_KEY = "7603206f402a60ea22d6cbb033b440a513c863bf";
 
-export default function Search() {
-    const [characterName, setCharacterName] = useState("");
-    const [characterData, setCharacterData] = useState("null");
-    const [comicData, setComicData] = useState("null");
+function Search() {
+    const [characters, setCharacters] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
 
-    const PUBLIC_API_KEY = import.meta.env.VITE_PUBLIC_API_KEY;
-    const PRIVATE_API_KEY= import.meta.env.VITE_PRIVATE_API_KEY;
-
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        getCharacterData();
+    const fetchCharacters = async (nameStartsWith) => {
+        const timestamp = new Date().getTime();
+        const hash = md5(timestamp + PRIVATE_API_KEY + PUBLIC_API_KEY);
+        try {
+            const response = await fetch(`${API_URL}?apikey=${PUBLIC_API_KEY}&ts=${timestamp}&hash=${hash}&nameStartsWith=${nameStartsWith}`);
+            const data = await response.json();
+            setCharacters(data.data.results);
+        } catch (error) {
+            console.error("Error fetching characters:", error);
+        }
     };
 
-    const generateHash = (timeStamp) => {
-        return md5(timeStamp  + PUBLIC_API_KEY + PRIVATE_API_KEY);
+    useEffect(() => {
+        fetchCharacters('Captain America'); // Initial fetch
+    }, []);
 
-    };
-
-    const getCharacterData = () => {
-        setCharacterData(null);
-        setComicData(null);
-
-        const timeStamp = new Date().getTime();
-        const hash = generateHash(timeStamp);
-
-        //const url = `https://gateway.marvel./v1/public/characters?apikey=${publicKey}&hash=${hash}&ts=${timeStamp}&nameStartsWith=${characterName}&limit=100`;
-        const url = `https://gateway.marvel.com/v1/public/characters/?apikey=${PUBLIC_API_KEY}&ts=${timeStamp}&hash=${hash}`;
-        fetch(url)
-            .then((response) => response.json())
-            .then((result) => {
-                setCharacterData(result.data);
-                console.log(result.data);
-            })
-
-            .catch(() => {
-                console.log('error while getting Character Data');
-
-            });
-        
-    }
-
-    const handleChange = (event) => {
-        setCharacterName(event.target.value);
-    };
-
-    const handleReset = () => {
-        // ll use later 
+    const handleSearch = () => {
+        fetchCharacters(searchTerm);
     };
 
     return (
-        <>
-            <form className="search" onSubmit={handleSubmit}>
+        <div className='app'>
+            <h1>Marvel Characters</h1>
+            <div className='search'>
                 <input
-                    type="text"
-                    placeholder="Enter Character Name"
-                    onChange={handleChange}
-                />
-                <div className="buttons">
-                    <button type="submit">Get Chracter Data</button>
-                    <button type="reset" className="reset" onClick={handleChange}>
-                        Reset
-                    </button>
+                    placeholder='Search for Characters'
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)} />
+                <button onClick={handleSearch}>Search</button>
+            </div>
+            {characters?.length > 0 ? (
+                <div className="container">
+                    {characters.map((character) => (
+                        <div className='character' key={character.id}>
+                            <div>
+                                <img src={`${character.thumbnail.path}/standard_fantastic.${character.thumbnail.extension}`} alt={character.name} />
+                            </div>
+                            <div>
+                                <h3>{character.name}</h3>
+                                <p>{character.description}</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            </form>
-        </>
+            ) : (
+                <div className='empty'>
+                    <h2>No Characters Found</h2>
+                </div>
+            )}
+        </div>
     );
 }
-// buttons to search characters name and reset it
-// 
+
+export default Search;
